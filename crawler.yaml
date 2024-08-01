@@ -1,0 +1,15 @@
+name: ua_kmr_voting
+description: "Roll-call voting KMR"
+pipeline:
+  init:
+    method: ua_kmr_voting:init
+    # params:
+    #   dataset: ua_kmr_voting
+    handle:
+      pass: store
+  store:
+    method: ua_kmr_voting:store
+    params:
+      dataset: ua_kmr_voting
+    #   roll_call_voting: roll_call_voting
+
