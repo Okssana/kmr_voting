@@ -26,10 +26,13 @@ URL = 'https://kmr.gov.ua/uk/result_golosuvanya?title=&field_start_date_n_h_valu
 
 
 
-HEADERS_XLSX = ["id",  "time", "question", "status", "short_name", "result"]
+HEADERS_XLSX = ["id",  "time", "question", "status", "short_name", "result", "file_name", "source_url"]
 
 # Counter to ensure uniqueness
 counter = 0
+
+import time
+timestamp = int(time.time())  # Add a timestamp for uniqueness
 
 def request_page(context, url):
 
@@ -75,30 +78,43 @@ def download_and_process(context, link, is_zip):
     
     if response:
         file_name = link.split('/')[-1]
+        print("\n")
+        print("Link in download_and_process: ", link)
+        print("File name in download_and_process: ", file_name)
+
         file_path = pathlib.Path(response.file_path)
+
+        print("File path in download_and_process: ", file_path)
         
         if is_zip:  # Process ZIP files
             extract_to = pathlib.Path(context.work_path)
             with zipfile.ZipFile(file_path, "r") as zf:
                 zf.extractall(extract_to)
         else:  # Process XLSX files
-            process_xlsx_file(context, file_path, file_name, link)
+            process_xlsx_file(context, file_path)
     else:
         context.log.info(f"Skipping file: {link}")
 
 
-def process_xlsx_file(context, path, file_name, source_url):
+def process_xlsx_file(context, path):
     """Process a single XLSX file."""
+
     new_path = path.with_suffix('.xlsx')
     
+    print("Path: ", path)
+    print("New path: ", new_path)
+
     # Read and save the file with .xlsx extension
     with open(path, 'rb') as f:
         file_content = f.read()
 
     with open(new_path, 'wb') as f:
         f.write(file_content)
+
+    # Process the XLSX file
+    file_name = new_path.name
     
-    process_xlsx(context, new_path, file_name, source_url)
+    process_xlsx(context, new_path, path)
 
     context.log.info(f"Processed XLSX file: {file_name}")
 
@@ -116,87 +132,79 @@ def init(context, data):
                     if 'zip' in j.text_content():  # ZIP files
                         link = j.xpath('.//a/@href')[1]
                         executor.submit(download_and_process, context, link, True)
+
                     elif 'xlsx' in j.text_content():  # XLSX files
                         link_xlsx = j.xpath('.//a/@href')[1]
                         context.log.info(f"Processing XLSX file: {link_xlsx}")
                         executor.submit(download_and_process, context, link_xlsx, False)
 
 
-def process_xlsx(context, file_path, file_name, URL_FULL_PAGE):
+
+def process_xlsx(context, file_path):
+    """Process the XLSX files and emit rows."""
     combined_wb = Workbook()
     combined_sheet = combined_wb.active
     combined_sheet.append(HEADERS_XLSX)
 
     xlsx_files = [file for file in os.listdir(context.work_path) if file.endswith('.xlsx')]
 
-    
     for xlsx_file in xlsx_files:
         context.log.info(f"Processing XLSX file: {xlsx_file}")
+
         file_path = os.path.join(context.work_path, xlsx_file)
         wb = load_workbook(file_path, read_only=True)
         ws = wb[wb.sheetnames[0]]
+
         max_row = find_last_row(ws)
         non_empty_col_count = count_non_empty_columns(ws)
         
-        start_col = 5 if non_empty_col_count == 125 else 6
+        start_col = 5 if non_empty_col_count == 125 else 6 # Adjust start column based on the number of columns
+        print("Start column: ", start_col)
+        print("Max row: ", max_row)
         fixed_cols_range = range(1, start_col)
+        print("Fixed cols range: ", fixed_cols_range)
 
+        # Iterate through rows and emit data as a dictionary
         for row in ws.iter_rows(min_row=2, max_row=max_row, values_only=True):
-            fixed_data = [row[col - 1] for col in fixed_cols_range]
-            for col in range(start_col, start_col + 121):
+            fixed_data = {f"fixed_col_{col}": row[col - 1] for col in fixed_cols_range}
+            
+            for col in range(start_col, start_col + 122):
                 entity_name = ws.cell(row=1, column=col).value
                 result = row[col - 1]
-                new_row = fixed_data + [entity_name, result]
-                combined_sheet.append(new_row)
 
-        combined_path = f"/Users/Oksana/Documents/PERSONAL_PRJCTS/ua_kmr_voting/excel/long_table_{file_name}"
+                # Create a dictionary for the row
+                new_row = {
+                    **fixed_data,
+                    "entity_name": entity_name,
+                    "result": result,
+                    "xlsx_file": xlsx_file # hash
+                }
 
-        combined_wb.save(combined_path)
-        context.log.info(f"Combined XLSX file saved: {combined_path}")
-        emit_rows_from_excel(context, combined_path, xlsx_file, file_name, URL_FULL_PAGE)
+                # Emit the dictionary to the next stage
+                context.emit(data=new_row)
 
-
-def emit_rows_from_excel(context, file_path, xlsx_file, file_name, URL_FULL_PAGE):
-    context.log.info(f"Processing EXCEL FILE: {file_path}, {xlsx_file}, {file_name}, {URL_FULL_PAGE}, '\n'")
-
-    wb = load_workbook(file_path, read_only=True)
-    sheet = wb.active
-    for row in sheet.iter_rows(min_row=2, values_only=True):
-        data_rows = {
-            "id": row[0],
-            "time": row[1],
-            "question": row[2],
-            "status": row[3],
-            "short_name": row[4],
-            "result": transform_results(row[5]),
-            "file_name": xlsx_file,
-            "file_name_original": file_name,
-            "source_url": URL_FULL_PAGE
-        }
-        context.emit(data=data_rows)
 
 
 def store_exel(context, data):
+
+    #context.log.info(f"Storing data: {data.get('fixed_col_2')}")
+
     global counter # Counter is global. Defined outside the function in the main script
     counter += 1 # Increment counter to ensure uniqueness
 
-    unique_string = str(int(data.get('id')) + int(counter))
+    unique_string = str(int(data.get('fixed_col_1')) + int(counter))
     unique_id = hashlib.md5(unique_string.encode()).hexdigest()
-    #time.sleep(1)
-
-    # Ensure all fields match the expected types in your database
 
     doc_data = {
         #'id': unique_id,  # Ensure id is always a string
-        'id_original': data.get('id'), # Keep original ID for reference
+        'id_original': data.get('fixed_col_1'), # Keep original ID for reference
         "unique_id": unique_id,
-        'time': str(data.get('time')), 
-        'question': data.get('question') or "", 
-        'status': data.get('status') or "",  
-        'short_name': data.get('short_name') or "",  
+        'time': str(data.get('fixed_col_2')), 
+        'question': data.get('fixed_col_3') or "", 
+        'status': data.get('fixed_col_4') or "",  
+        'short_name': data.get('entity_name') or "",  
         'result': data.get('result') or "", 
-        'source_file': data.get('file_name') or None,  
-        "source_file_original": data.get('file_name_original') or None,
+        "file_original": data.get('xlsx_file'),
         'retrieved_at': datetime.now().isoformat(),
         'source_url': data.get('source_url') or None  
     }
@@ -205,11 +213,11 @@ def store_exel(context, data):
     table.upsert(doc_data, [#'id', # id is present by default, no need to specify
                             'id_original', 'unique_id',
                             'time', 'question', 'status', 'short_name', 'result',
-                            'source_file', 'source_file_original',
+                            #'source_file', 
+                            'file_original',
                             'retrieved_at', 'source_url'])
 
-    context.log.info(f"Stored Number of Question in data dict: {data.get('id')} for the day : {data.get('time')}")
-
+    #context.log.info(f"Stored for the day: {data.get('time')}")
 
 
 # Function to preprocess JSON data
