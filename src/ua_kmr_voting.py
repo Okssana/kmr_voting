@@ -46,7 +46,7 @@ def request_page(context, url):
     return response
 
 
-def count_non_empty_columns(sheet, row=2):
+def count_non_empty_columns(sheet, row=2): # Default row is 2
     """Function to count the number of non-empty columns in the specified row."""
     max_col = sheet.max_column
     non_empty_cols = 0
@@ -96,28 +96,45 @@ def download_and_process(context, link, is_zip):
         context.log.info(f"Skipping file: {link}")
 
 
-def process_xlsx_file(context, path):
-    """Process a single XLSX file."""
+# def process_xlsx_file(context, path):
+#     """Process a single XLSX file."""
 
-    new_path = path.with_suffix('.xlsx')
+#     new_path = path.with_suffix('.xlsx')
+
+#     # Read and save the file with .xlsx extension
+#     with open(path, 'rb') as f:
+#         file_content = f.read()
+
+#     with open(new_path, 'wb') as f:
+#         f.write(file_content)
+
+#     # Process the XLSX file
+#     file_name = new_path.name
     
-    print("Path: ", path)
-    print("New path: ", new_path)
+#     process_xlsx(context, new_path)
 
-    # Read and save the file with .xlsx extension
+#     context.log.info(f"Processed XLSX file: {file_name}")
+
+
+processed_files = set()
+
+def process_xlsx_file(context, path):
+    new_path = path.with_suffix('.xlsx')
+
+    if new_path in processed_files:
+        context.log.info(f"Skipping already processed file: {new_path}")
+        return
+
     with open(path, 'rb') as f:
         file_content = f.read()
 
     with open(new_path, 'wb') as f:
         f.write(file_content)
 
-    # Process the XLSX file
-    file_name = new_path.name
+    processed_files.add(new_path)
     
-    process_xlsx(context, new_path, path)
-
-    context.log.info(f"Processed XLSX file: {file_name}")
-
+    # Process the XLSX file
+    process_xlsx(context, new_path)
 
 def init(context, data):
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
@@ -142,35 +159,46 @@ def init(context, data):
 
 def process_xlsx(context, file_path):
     """Process the XLSX files and emit rows."""
-    combined_wb = Workbook()
-    combined_sheet = combined_wb.active
-    combined_sheet.append(HEADERS_XLSX)
+
+    print(" file_path : ", file_path)
+
+    # combined_wb = Workbook()
+    # combined_sheet = combined_wb.active
+    # combined_sheet.append(HEADERS_XLSX)
 
     xlsx_files = [file for file in os.listdir(context.work_path) if file.endswith('.xlsx')]
+    print("XLSX files: ", xlsx_files)
+    #xlsx_files = [file for file in os.listdir(context.work_path) if file.endswith('.xlsx')]
 
     for xlsx_file in xlsx_files:
         context.log.info(f"Processing XLSX file: {xlsx_file}")
 
         file_path = os.path.join(context.work_path, xlsx_file)
-        wb = load_workbook(file_path, read_only=True)
+        wb = load_workbook(file_path, read_only=False)
         ws = wb[wb.sheetnames[0]]
 
-        max_row = find_last_row(ws)
-        non_empty_col_count = count_non_empty_columns(ws)
+        max_row_N = find_last_row(ws)
+        non_empty_col_count = count_non_empty_columns(ws) # Count non-empty columns in the first row
         
+        #start_col = 5 if non_empty_col_count == 125 else 6 # Adjust start column based on the number of columns
         start_col = 5 if non_empty_col_count == 125 else 6 # Adjust start column based on the number of columns
+
         print("Start column: ", start_col)
-        print("Max row: ", max_row)
+        print("Max row: ", max_row_N)
         fixed_cols_range = range(1, start_col)
         print("Fixed cols range: ", fixed_cols_range)
 
-        # Iterate through rows and emit data as a dictionary
-        for row in ws.iter_rows(min_row=2, max_row=max_row, values_only=True):
+        # end column is the start column + 122
+        print("End column: ", start_col + 122)
+
+        #processed_rows = set()  # Track unique rows
+
+        for row in ws.iter_rows(min_row=2, max_row=max_row_N, values_only=True):
             fixed_data = {f"fixed_col_{col}": row[col - 1] for col in fixed_cols_range}
-            
-            for col in range(start_col, start_col + 122):
+            #print("Fixed data row len: ", len(row))
+            for col in range(start_col, start_col + 122):  # Adjust end column based on the number of columns
                 entity_name = ws.cell(row=1, column=col).value
-                result = row[col - 1]
+                result = row[col - 1] 
 
                 # Create a dictionary for the row
                 new_row = {
@@ -179,7 +207,6 @@ def process_xlsx(context, file_path):
                     "result": result,
                     "xlsx_file": xlsx_file # hash
                 }
-
                 # Emit the dictionary to the next stage
                 context.emit(data=new_row)
 
@@ -192,32 +219,31 @@ def store_exel(context, data):
     global counter # Counter is global. Defined outside the function in the main script
     counter += 1 # Increment counter to ensure uniqueness
 
-    unique_string = str(int(data.get('fixed_col_1')) + int(counter))
-    unique_id = hashlib.md5(unique_string.encode()).hexdigest()
+    #unique_string = str(int(data.get('fixed_col_1')) + int(counter))
+    #unique_id = hashlib.md5(unique_string.encode()).hexdigest()
 
     doc_data = {
         #'id': unique_id,  # Ensure id is always a string
         'id_original': data.get('fixed_col_1'), # Keep original ID for reference
-        "unique_id": unique_id,
+        #"unique_id": unique_id,
         'time': str(data.get('fixed_col_2')), 
-        'question': data.get('fixed_col_3') or "", 
-        'status': data.get('fixed_col_4') or "",  
-        'short_name': data.get('entity_name') or "",  
-        'result': data.get('result') or "", 
-        "file_original": data.get('xlsx_file'),
-        'retrieved_at': datetime.now().isoformat(),
-        'source_url': data.get('source_url') or None  
+        'question': data.get('fixed_col_3'), 
+        'status': data.get('fixed_col_4'),  
+        'short_name': data.get('entity_name'),  
+        'result': data.get('result'), 
+        "processed_xlsx": data.get('xlsx_file'),
+        'retrieved_at': datetime.now().isoformat()
     }
 
     table = context.datastore['ua_kmr_voting_xlsx']
     table.upsert(doc_data, [#'id', # id is present by default, no need to specify
-                            'id_original', 'unique_id',
+                            'id_original', 
+                            #'unique_id',
                             'time', 'question', 'status', 'short_name', 'result',
-                            #'source_file', 
-                            'file_original',
+                      
+                            'processed_xlsx',
                             'retrieved_at', 'source_url'])
 
-    #context.log.info(f"Stored for the day: {data.get('time')}")
 
 
 # Function to preprocess JSON data
