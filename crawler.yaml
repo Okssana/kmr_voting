@@ -1,15 +1,14 @@
 name: ua_kmr_voting
-description: "Roll-call voting KMR"
+description: "Roll-call voting of Kyiv City Council"
 pipeline:
   init:
     method: ua_kmr_voting:init
-    # params:
-    #   dataset: ua_kmr_voting
     handle:
-      pass: store
-  store:
-    method: ua_kmr_voting:store
-    params:
-      dataset: ua_kmr_voting
-    #   roll_call_voting: roll_call_voting
+      excel: store_exel
+      json: store_json
+  store_exel:
+    method: ua_kmr_voting:store_exel
+  store_json:
+    method: ua_kmr_voting:store_exel
+
 

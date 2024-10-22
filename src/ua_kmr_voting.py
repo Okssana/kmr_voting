@@ -71,10 +71,7 @@ def transform_results(row):
         return row # return unchanged result if not '...'
 
 
-
-
-
-
+### PROCESS XLSX FILES ###
 processed_files = set()
 
 def process_xlsx_file(context, path):
@@ -111,7 +108,7 @@ def download_and_process(context, link, is_zip):
             # add a suffix to the file name
             file_path = file_path.with_suffix('.zip')
             os.rename(response.file_path, file_path)
-
+ 
             extract_to = pathlib.Path(context.work_path) / file_name # create a directory to extract into
             context.log.info(f"Downloaded and stored ZIP file: {file_name}, in {extract_to}") # Downloaded and stored ZIP file: 14.05.22_1_z_kovalchukom.zip, in /var/folders/gx/61q8sz7d4r9g0nl993whgmhc0000gp/T/tmpsdaxn8pb/14.05.22_1_z_kovalchukom.zip 
             zipfile_paths.append(file_path)
@@ -123,6 +120,11 @@ def download_and_process(context, link, is_zip):
 
             # Process the extracted files
             process_extracted_files(context, extract_to)
+
+        else:  # Process XLSX files
+            process_xlsx_file(context, file_path)
+    else:
+        context.log.error(f"Failed to download file: {link}")
 
 
 
@@ -179,7 +181,8 @@ def process_extracted_files(context, extract_to):
                 'DPList': json_data['DPList']
             }
             print("*******************")
-            context.emit(data=dict_d)
+            store_json(context, dict_d)
+            #context.emit(data=dict_d)
             #context.log.info(f"Extracted data emitted: {json_file}")
 
 
@@ -242,11 +245,9 @@ def store_json(context, data):
     if not dp_list:
         combined_data.append(doc_data)
     
-    # Insert combined data into a single table
-    table_name = context.params.get('dataset')
-    table = context.datastore[table_name]
+    table = context.datastore['ua_kmr_voting_json']
     for entry in combined_data:
-        #print("Entry:", entry, "\n")
+
         table.upsert(entry, ['id', 'file_name', 
                              'SName', 'GLType', 'GLTime', 'PD_NPP', 'GL_Text', 
                              'DocTime', 'DPName', 'DPGolos'])
