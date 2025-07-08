@@ -3,12 +3,15 @@ description: "Roll-call voting of Kyiv City Council"
 pipeline:
   init:
     method: ua_kmr_voting:init
-    handle:
-      excel: store_exel
-      json: store_json
-  store_exel:
-    method: ua_kmr_voting:store_exel
-  store_json:
-    method: ua_kmr_voting:store_exel
+
+  #   handle:
+  #     excel: store_exel
+  #     json: store_json
+
+  # store_exel:
+  #   method: ua_kmr_voting:store_exel
+    
+  # store_json:
+  #   method: ua_kmr_voting:store_json
 
 

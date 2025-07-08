@@ -14,6 +14,17 @@ URL = 'https://kmr.gov.ua/uk/result_golosuvanya?title=&field_start_date_n_h_valu
 HEADERS_XLSX = ["id",  "time", "question", "status", "short_name", "result", "file_name", "source_url"]
 
 
+import re
+# Function to preprocess JSON data
+def preprocess_json(file_path):
+    with open(file_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    # Correct invalid newline characters within strings
+    corrected_content = re.sub(r'(?<!\\)"\s*\n\s*"', r'\"', content)
+    
+    return corrected_content
+
 def request_page(context, url):
 
     for attempt in range(1, 5):
