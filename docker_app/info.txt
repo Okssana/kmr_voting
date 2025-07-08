@@ -1,0 +1,318 @@
+After I added SSH keys succesfully =>
+
+(memorious_new) Oksana@Oksanas-MacBook-Pro docker_app % ssh root@142.93.109.39
+Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 5.15.0-136-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Thu Apr 17 17:02:03 UTC 2025
+
+  System load:  0.08               Processes:             93
+  Usage of /:   17.7% of 24.05GB   Users logged in:       0
+  Memory usage: 24%                IPv4 address for eth0: 142.93.109.39
+  Swap usage:   0%                 IPv4 address for eth0: 10.19.0.5
+
+Expanded Security Maintenance for Applications is not enabled.
+
+19 updates can be applied immediately.
+4 of these updates are standard security updates.
+To see these additional updates run: apt list --upgradable
+
+Enable ESM Apps to receive additional future security updates.
+See https://ubuntu.com/esm or run: sudo pro status
+
+
+********************************************************************************
+
+Welcome to DigitalOcean's 1-Click Docker Droplet.
+To keep this Droplet secure, the UFW firewall is enabled.
+All ports are BLOCKED except 22 (SSH), 2375 (Docker) and 2376 (Docker).
+
+* The Docker 1-Click Quickstart guide is available at:
+  https://do.co/3j6j3po#start
+
+
+And I am inside a docker in my terminal: 
+
+root@docker-s-1vcpu-1gb-fra1-01:~# ls
+snap
+
+
+root@docker-s-1vcpu-1gb-fra1-01:~# apt update
+Hit:1 http://security.ubuntu.com/ubuntu jammy-security InRelease
+Hit:2 https://download.docker.com/linux/ubuntu jammy InRelease                                                                        
+Hit:3 http://mirrors.digitalocean.com/ubuntu jammy InRelease                                                                          
+Hit:4 http://mirrors.digitalocean.com/ubuntu jammy-updates InRelease
+Hit:5 https://repos-droplet.digitalocean.com/apt/droplet-agent main InRelease
+Hit:6 http://mirrors.digitalocean.com/ubuntu jammy-backports InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+14 packages can be upgraded. Run 'apt list --upgradable' to see them.
+W: https://download.docker.com/linux/ubuntu/dists/jammy/InRelease: Key is stored in legacy trusted.gpg keyring (/etc/apt/trusted.gpg), see the DEPRECATION section in apt-key(8) for details.
+
+
+root@docker-s-1vcpu-1gb-fra1-01:~# apt install -y docker.io
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Some packages could not be installed. This may mean that you have
+requested an impossible situation or if you are using the unstable
+distribution that some required packages have not yet been created
+or been moved out of Incoming.
+The following information may help to resolve the situation:
+
+The following packages have unmet dependencies:
+ containerd.io : Conflicts: containerd
+E: Error, pkgProblemResolver::Resolve generated breaks, this may be caused by held packages.
+
+
+root@docker-s-1vcpu-1gb-fra1-01:~# systemctl start docker
+systemctl enable docker
+Synchronizing state of docker.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install enable docker
+
+docker pull oksiks/kmr-voting-explorer:latest
+
+Pull and Run Your Docker Image:
+
+root@docker-s-1vcpu-1gb-fra1-01:~# docker pull oksiks/kmr-voting-explorer:latest
+latest: Pulling from oksiks/kmr-voting-explorer
+no matching manifest for linux/amd64 in the manifest list entries 
+
+
+(memorious_new) Oksana@Oksanas-MacBook-Pro docker_app % docker buildx build --platform linux/amd64 -t oksiks/kmr-voting-explorer:latest .
+
+[+] Building 33.5s (10/10) FINISHED                                                                                 docker:desktop-linux
+ => [internal] load build definition from Dockerfile                                                                                0.0s
+ => => transferring dockerfile: 578B                                                                                                0.0s
+ => [internal] load metadata for docker.io/library/python:3.9-slim                                                                  1.2s
+ => [internal] load .dockerignore                                                                                                   0.0s
+ => => transferring context: 2B                                                                                                     0.0s
+ => [1/5] FROM docker.io/library/python:3.9-slim@sha256:9aa5793609640ecea2f06451a0d6f379330880b413f954933289cf3b27a78567            9.1s
+ => => resolve docker.io/library/python:3.9-slim@sha256:9aa5793609640ecea2f06451a0d6f379330880b413f954933289cf3b27a78567            0.0s
+ => => sha256:97d21b95fb00ac3b08975ab6f8709f3a7e35a05d75e2f9a70fa95348279dac27 250B / 250B                                          0.3s
+ => => sha256:8a628cdd7ccc83e90e5a95888fcb0ec24b991141176c515ad101f12d6433eb96 28.23MB / 28.23MB                                    3.4s
+ => => sha256:74018f7cfa8f2965fd86b13c38f71417bc846e071a5f5bb5ae569ccb5a6e7248 3.51MB / 3.51MB                                      5.4s
+ => => sha256:a0b0cfc480ce03c723a597904bcfbf28c71438c689e6d5097c2332835f67a40c 14.93MB / 14.93MB                                    8.2s
+ => => extracting sha256:8a628cdd7ccc83e90e5a95888fcb0ec24b991141176c515ad101f12d6433eb96                                           2.5s
+ => => extracting sha256:74018f7cfa8f2965fd86b13c38f71417bc846e071a5f5bb5ae569ccb5a6e7248                                           0.4s
+ => => extracting sha256:a0b0cfc480ce03c723a597904bcfbf28c71438c689e6d5097c2332835f67a40c                                           0.6s
+ => => extracting sha256:97d21b95fb00ac3b08975ab6f8709f3a7e35a05d75e2f9a70fa95348279dac27                                           0.0s
+ => [internal] load build context                                                                                                   8.5s
+ => => transferring context: 688.84MB                                                                                               8.5s
+ => [2/5] WORKDIR /docker_app                                                                                                       0.7s
+ => [3/5] RUN pip install datasette datasette-vega datasette-cluster-map datasette-pretty-json                                     11.2s
+ => [4/5] COPY kmr_voting.db /docker_app/                                                                                           1.9s 
+ => [5/5] COPY metadata.json /docker_app/                                                                                           0.0s 
+ => exporting to image                                                                                                              9.2s 
+ => => exporting layers                                                                                                             9.1s 
+ => => exporting manifest sha256:d34e05ad8729396c3f6c31ae979d1e8806ac8d4a1643729e8800826ba7c45d94                                   0.0s 
+ => => exporting config sha256:e70c767da814a8b697ab4ab58a0e6824851ca3a855125f267444a953ec6834c0                                     0.0s 
+ => => exporting attestation manifest sha256:8f36803ddd0d8f28d11e6454bf11d293bc407146822390939f0ccef418d47f2b                       0.0s
+ => => exporting manifest list sha256:cfc52fd7bc6337e5f20e49e355b22ebf888379dc5f78f7678c3a85b70c9dd5b5                              0.0s
+ => => naming to docker.io/oksiks/kmr-voting-explorer:latest                                                                        0.0s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/2ykbawku4drxn4n9p8xxcahwy
+
+What's next:
+    View a summary of image vulnerabilities and recommendations → docker scout quickview 
+
+
+
+(memorious_new) Oksana@Oksanas-MacBook-Pro docker_app % docker push oksiks/kmr-voting-explorer:latest
+The push refers to repository [docker.io/oksiks/kmr-voting-explorer]
+8a628cdd7ccc: Pushed 
+a0b0cfc480ce: Pushed 
+9f57dfbeb4c9: Pushed 
+2cec27f06da1: Pushed 
+74018f7cfa8f: Pushed 
+97d21b95fb00: Pushed 
+6726c06dd8fe: Pushed 
+10f0031fdd72: Pushed 
+d373ef6c03cb: Pushed 
+latest: digest: sha256:cfc52fd7bc6337e5f20e49e355b22ebf888379dc5f78f7678c3a85b70c9dd5b5 size: 856
+
+Once pushed, you should be able to pull it on your DigitalOcean droplet:
+
+# On your droplet
+docker pull oksiks/kmr-voting-explorer:latest
+docker run -d -p 80:8001 --name datasette oksiks/kmr-voting-explorer:latest
+
+# Got to the droplet using ssh 
+root@docker-s-1vcpu-1gb-fra1-01:~# docker pull oksiks/kmr-voting-explorer:latest
+latest: Pulling from oksiks/kmr-voting-explorer
+8a628cdd7ccc: Pull complete 
+74018f7cfa8f: Pull complete 
+a0b0cfc480ce: Pull complete 
+97d21b95fb00: Pull complete 
+2cec27f06da1: Pull complete 
+9f57dfbeb4c9: Pull complete 
+d373ef6c03cb: Pull complete 
+10f0031fdd72: Pull complete 
+Digest: sha256:cfc52fd7bc6337e5f20e49e355b22ebf888379dc5f78f7678c3a85b70c9dd5b5
+Status: Downloaded newer image for oksiks/kmr-voting-explorer:latest
+docker.io/oksiks/kmr-voting-explorer:latest
+
+
+root@docker-s-1vcpu-1gb-fra1-01:~# docker run -d -p 80:8001 --name datasette oksiks/kmr-voting-explorer:latest
+7be5d0a532aadf16deb8dc886b3eb46fffd62ddfee9764af78adb7a692d20d57
+
+___
+
+Run the container:
+docker run -d -p 80:8001 --restart unless-stopped --name datasette username/kmr-voting-explorer:latest
+
+
+My website:
+http://142.93.109.39
+
+
+
+I updated metada.json file and in order to make this work I need to make these steps: 
+root@docker-s-1vcpu-1gb-fra1-01:~# mkdir -p /opt/datasette
+root@docker-s-1vcpu-1gb-fra1-01:~# nano /opt/datasette/metadata.json
+
+
+root@docker-s-1vcpu-1gb-fra1-01:/# docker stop datasette
+datasette
+root@docker-s-1vcpu-1gb-fra1-01:/# docker rm datasette
+datasette
+root@docker-s-1vcpu-1gb-fra1-01:/# docker run -d -p 80:8001 --name datasette \
+  -v /opt/datasette/metadata.json:/docker_app/metadata.json \
+  oksiks/kmr-voting-explorer:latest
+3001aea4641a272843ce5de5ec3f36f22186f3d9cba311cfc59b15fe83e9f948
+
+
+My problems: columns in the dataset are not translated as should accoring to metadata.json. Claud says we have to work with .html 
+
+root@docker-s-1vcpu-1gb-fra1-01:/opt/datasette# docker stop datasette
+docker rm datasette
+datasette
+datasette
+root@docker-s-1vcpu-1gb-fra1-01:/opt/datasette# mkdir -p /opt/datasette/templates
+root@docker-s-1vcpu-1gb-fra1-01:/opt/datasette# nano /opt/datasette/templates/table.html
+root@docker-s-1vcpu-1gb-fra1-01:/opt/datasette# cat /opt/datasette/templates/table.html
+
+
+Text for nano file table.html: 
+
+
+{% extends "base.html" %}
+
+{% block title %}{{ database_name }}: {{ table_name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+  th[data-column="Faction"]::after { content: " (Фракція)"; font-size: 0.8em; color: #666; }
+  th[data-column="DPName_normalized"]::after { content: " (ПІБ)"; font-size: 0.8em; color: #666; }
+  th[data-column="company"]::after { content: " (Назви компаній)"; font-size: 0.8em; color: #666; }
+  th[data-column="address"]::after { content: " (Адреси)"; font-size: 0.8em; color: #666; }
+  th[data-column="district"]::after { content: " (Райони)"; font-size: 0.8em; color: #666; }
+  th[data-column="person"]::after { content: " (ПІБ фізичних осіб)"; font-size: 0.8em; color: #666; }
+  th[data-column="date_desctiption"]::after { content: " (Дата питання)"; font-size: 0.8em; color: #666; }
+  th[data-column="DocTime"]::after { content: " (Дата)"; font-size: 0.8em; color: #666; }
+</style>
+{% endblock %}
+
+
+root@docker-s-1vcpu-1gb-fra1-01:/opt/datasette# cd /opt/datasette
+docker build -t datasette-custom .
+[+] Building 0.1s (1/1) FINISHED                                                                                          docker:default
+ => [internal] load build definition from Dockerfile                                                                                0.0s
+ => => transferring dockerfile: 2B                                                                                                  0.0s
+ERROR: failed to solve: failed to read dockerfile: open Dockerfile: no such file or directory
+root@docker-s-1vcpu-1gb-fra1-01:/opt/datasette# nano /opt/datasette/Dockerfile
+root@docker-s-1vcpu-1gb-fra1-01:/opt/datasette# cat /opt/datasette/Dockerfile
+
+
+My created Dockerfile: 
+FROM python:3.9-slim
+WORKDIR /docker_app
+RUN pip install datasette datasette-vega datasette-cluster-map datasette-pretty-json datasette-template-sql
+COPY metadata.json /docker_app/
+EXPOSE 8001
+CMD ["datasette", "--host", "0.0.0.0", "--port", "8001", "kmr_voting.db", "--metadata", "metadata.json", "--template-dir", "/templates", "--setting", "sql_time_limit_ms", "30000", "--setting", "max_returned_rows", "1000"]
+
+
+Run: 
+
+root@docker-s-1vcpu-1gb-fra1-01:/opt/datasette# docker build -t datasette-custom .
+[+] Building 12.5s (9/9) FINISHED                                                                                         docker:default
+ => [internal] load build definition from Dockerfile                                                                                0.0s
+ => => transferring dockerfile: 454B                                                                                                0.0s
+ => [internal] load metadata for docker.io/library/python:3.9-slim                                                                  1.2s
+ => [internal] load .dockerignore                                                                                                   0.0s
+ => => transferring context: 2B                                                                                                     0.0s
+ => [1/4] FROM docker.io/library/python:3.9-slim@sha256:9aa5793609640ecea2f06451a0d6f379330880b413f954933289cf3b27a78567            0.1s
+ => => resolve docker.io/library/python:3.9-slim@sha256:9aa5793609640ecea2f06451a0d6f379330880b413f954933289cf3b27a78567            0.0s
+ => => sha256:9aa5793609640ecea2f06451a0d6f379330880b413f954933289cf3b27a78567 10.41kB / 10.41kB                                    0.0s
+ => => sha256:d6e2ddca278e1b84c1a934ca8f07bbbfe6b6ec936a0b68107c862769f66734fa 1.75kB / 1.75kB                                      0.0s
+ => => sha256:501f96d59d707efd12df137b6d001069e83068678ef241ca5bdaf05882636b79 5.29kB / 5.29kB                                      0.0s
+ => [internal] load build context                                                                                                   0.1s
+ => => transferring context: 1.81kB                                                                                                 0.1s
+ => [2/4] WORKDIR /docker_app                                                                                                       0.0s
+ => [3/4] RUN pip install datasette datasette-vega datasette-cluster-map datasette-pretty-json datasette-template-sql              10.3s
+ => [4/4] COPY metadata.json /docker_app/                                                                                           0.1s 
+ => exporting to image                                                                                                              0.6s 
+ => => exporting layers                                                                                                             0.6s 
+ => => writing image sha256:79fb80f95609c0b17d4b61458b56f2a74120a20279a2f67513ca3b68ae71b595                                        0.0s 
+ => => naming to docker.io/library/datasette-custom  
+
+
+
+Since we don't want to include the database in the Docker image (it's too large), we'll mount it as a volume instead. After building the image, run it with:
+
+scp /Users/Oksana/Documents/PERSONAL_PRJCTS/ua_kmr_voting/docker_app/kmr_voting.db root@docker-s-1vcpu-1gb-fra1-01/:/opt/datasette/
+scp kmr_voting.db root@docker-s-1vcpu-1gb-fra1-01/:/opt/datasette/
+
+
+docker run -d -p 80:8001 --name datasette \
+  -v /opt/datasette/metadata.json:/docker_app/metadata.json \
+  -v /opt/datasette/templates:/templates \
+  -v /path/to/your/kmr_voting.db:/docker_app/kmr_voting.db \
+  datasette-custom
+
+Replace /path/to/your/kmr_voting.db with the actual path to your database file on the server.
+No, "/path/to/your/kmr_voting.db" is just a placeholder. You need to replace it with the actual location of your database file on your DigitalOcean Droplet (server), not on your laptop.
+
+If you don't know where your database is currently located, you can find it with:
+
+root@docker-s-1vcpu-1gb-fra1-01:/opt/datasette# docker inspect datasette | grep -A 10 Mounts
+Error: No such object: datasette
+
+http://142.93.109.39
+
+If your database is on your laptop and you need to upload it to the server, you can use SCP:
+scp kmr_voting.db root@142.93.109.39:/opt/datasette/
+
+
+
+(memorious_new) Oksana@Oksanas-MacBook-Pro docker_app % scp kmr_voting.db root@142.93.109.39:/opt/datasette/
+kmr_voting.db   100%  657MB   3.9MB/s   02:48 
+
+
+Once you have the database file on your server, you can run the container with:
+
+docker run -d -p 80:8001 --name datasette \
+  -v /opt/datasette/metadata.json:/docker_app/metadata.json \
+  -v /opt/datasette/templates:/templates \
+  -v /opt/datasette/kmr_voting.db:/docker_app/kmr_voting.db \
+  datasette-custom
+
+The key concept here is that the docker run command needs to mount the database file from a location on your server (the Droplet) to a location inside the container.
+
+Should I run it inside a droplet ?
+docker run -d -p 80:8001 --name datasette \
+  -v /opt/datasette/metadata.json:/docker_app/metadata.json \
+  -v /opt/datasette/templates:/templates \
+  -v /opt/datasette/kmr_voting.db:/docker_app/kmr_voting.db \
+  datasette-custom
+
+
+docker run -d -p 80:8001 --name datasette \
+  -v /opt/datasette/metadata.json:/docker_app/metadata.json \
+  -v /opt/datasette/kmr_voting.db:/docker_app/kmr_voting.db \
+  datasette-custom

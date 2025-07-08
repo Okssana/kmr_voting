@@ -1,0 +1,106 @@
+{
+  "title": "Поіменне голосування депутатів Київської міської ради",
+  "description": "Поіменне голосування депутатів Київської міської ради. Дані з серпня 2020 року.",
+  "source_url": "https://kmr.gov.ua/uk/result_golosuvanya",
+  "extra_css_urls": [
+    "/static/custom.css"
+  ],
+  "plugins": {
+    "datasette-search-all": {
+      "enabled": true
+    }
+  },
+  "databases": {
+    "kmr_voting_data": {
+      "tables": {
+        "roll_call_voting_kmr": {
+          "title": "Голосування КМР",
+          "sortable_columns": ["DPName_normalized", "GLTime", "company", "address", "district", "person", "date_description"],
+          "searchable_columns": ["Faction", "DPName_normalized", "GLTime", "company", "address", "district", "person", "date_description"],
+          "columns": {
+            "GL_Text": "Текст голосування",
+            "RESULT": "Результат (Прийнято або не прийнято)",
+            "company": "Компанія у тексті голосування (скорочено або повністю)",
+            "address": "Адреса у тексті голосування (ненормалізована)",
+            "district": "Район у тексті голосування (нормалізований)",
+            "person": "ПІБ у тексті голосування (родовий відмінок переважно)",
+            "date_description": "Дати в тексті голосування",
+            "GLTime": "Дата голосування",
+            "DPGolos": "Голосування депутата",
+            "PD_NPP": "Унікальний ID голосування",
+            "DPName_norsmalized": "ПІБ депутата"
+            },
+          "facets": ["Faction", "district", "DPGolos", "RESULT"],
+          "fts_table": "roll_call_voting_kmr_fts",
+          "fts_pk": "id",
+          "fts_columns": ["GL_Text", "RESULT", "company", "address", "district", "person", "date_description"]
+        },
+        "unique_votings": {
+          "title": "Список голосувань",
+          "facets": ["RESULT", "district"],
+          "searchable_columns": ["GL_Text", "RESULT", "company", "address", "district", "person", "date_description"],
+          "columns": {
+            "GL_Text": "Текст голосування",
+            "RESULT": "Результат (Прийнято або не прийнято)",
+            "company": "Компанія у тексті голосування (скорочено або повністю)",
+            "address": "Адреса у тексті голосування (ненормалізована)",
+            "district": "Район у тексті голосування (нормалізований)",
+            "person": "ПІБ у тексті голосування (родовий відмінок переважно)",
+            "date_description": "Дати в тексті голосування",
+            "GLTime": "Дата голосування",
+            "DPGolos": "Голосування депутата",
+            "PD_NPP": "Унікальний ID голосування",
+            "DPName_norsmalized": "ПІБ депутата",
+            "ForCnt": "Кількість голосів за",
+            "AgainstCnt": "Кількість голосів проти",
+            "AbstainedCnt": "Кількість утримавшихся",
+            "DidNotVoteCnt": "Кількість не голосувавших",
+            "AbsenteeCnt": "Кількість відсутніх"},
+           
+          "filters": {
+            "RESULT": {
+              "type": "text",
+              "placeholder": "Фільтрувати за результатом"
+            },
+            "company": {
+              "type": "text",
+              "placeholder": "Фільтрувати за компанією"
+            },
+            "address": {
+              "type": "text",
+              "placeholder": "Фільтрувати за адресою"
+            },
+            "district": {
+              "type": "text",
+              "placeholder": "Фільтрувати за районом"
+            },
+            "person": {
+              "type": "text",
+              "placeholder": "Фільтрувати за ПІБ"
+            },
+            "GL_Text": {
+              "title": "Текст голосування",
+              "type": "text",
+              "placeholder": "голосування"
+            }
+
+          }
+        }
+      }
+    }
+  },
+  "settings": {
+    "default_page_size": 50,
+    "max_returned_rows": 1000,
+    "sql_time_limit_ms": 60000,
+    "allow_facet": true,
+    "allow_download": true,
+    "default_facet_size": 30,
+    "facet_suggest": true,
+    "facet_time_limit_ms": 5000,
+    "cache_size_kb": 50000,
+    "num_sql_threads": 4,
+    "datasette-hashed-urls": 1,
+    "truncate_cells_html": 50
+  }
+}

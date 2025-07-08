@@ -1,0 +1,190 @@
+.table-wrapper table col-ForCnt,
+.table-wrapper table col-ForCnt{
+    width: 120px !important;
+}
+
+.table-wrapper table td.AgainstCnt,
+.table-wrapper table th.AgainstCnt {
+    width: 120px !important;
+}
+
+.table-wrapper table td.AbstainedCnt,
+.table-wrapper table th.AbstainedCnt {
+    width: 120px !important;
+}
+
+.table-wrapper table td.DidNotVoteCnt,
+.table-wrapper table th.DidNotVoteCnt {
+    width: 120px !important;
+}
+
+.table-wrapper table td.AbsenteeCnt,
+.table-wrapper table th.AbsenteeCnt {
+    width: 120px !important;
+}
+
+
+
+
+
+
+/* Control column widths for specific columns */
+
+/* Set specific widths for your voting table columns */
+.table-wrapper table.rows-and-columns {
+  table-layout: fixed;
+  width: 100%;
+}
+
+/* col-rowid */
+.table-wrapper table td.col-rowid,
+.table-wrapper table th.col-rowid {
+  width: 50px;
+  min-width: 40px;
+}
+
+/* Specific column widths by column class */
+.table-wrapper table td.col-DPName_normalized,
+.table-wrapper table th.col-DPName_normalized {
+  width: 200px;
+  min-width: 150px;
+}
+
+.table-wrapper table td.col-Faction,
+.table-wrapper table th.col-Faction {
+  width: 60px;
+  min-width: 100px;
+}
+
+.table-wrapper table td.col-DPGolos,
+.table-wrapper table th.col-DPGolos {
+  width: 30px;
+  min-width: 60px;
+}
+
+.table-wrapper table td.col-GL_Text,
+.table-wrapper table th.col-GL_Text {
+  width: fit-content;
+}
+
+/* Force table layout */
+.table-wrapper table.rows-and-columns {
+table-layout: fixed !important;
+width: 100% !important;
+}
+
+/* Force GL_Text column width */
+.table-wrapper table td.col-GL_Text.type-str,
+.table-wrapper table th.col-GL_Text {
+width: 300px !important;
+min-width: 300px !important;
+max-width: 300px !important;
+overflow: hidden !important;
+text-overflow: ellipsis !important;
+white-space: nowrap !important;
+}
+
+/* Allow text wrapping on hover */
+.table-wrapper table td.col-GL_Text.type-str:hover {
+white-space: normal !important;
+overflow: visible !important;
+position: relative !important;
+z-index: 999 !important;
+background: white !important;
+border: 1px solid #ccc !important;
+}
+
+/* DPGolos column width */
+.table-wrapper table td.col-DPGolos.type-str,
+.table-wrapper table th.col-DPGolos {
+width: 120px !important;
+text-align: center !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.table-wrapper table td.col-PD_NPP,
+.table-wrapper table th.col-PD_NPP {
+  width: 100px;
+  min-width: 80px;
+}
+
+.table-wrapper table td.col-DocTime,
+.table-wrapper table th.col-DocTime {
+  width: 150px;
+  min-width: 120px;
+}
+
+.table-wrapper table td.col-RESULT,
+.table-wrapper table th.col-RESULT {
+  width: 100px;
+  min-width: 80px;
+}
+
+.table-wrapper table td.col-company,
+.table-wrapper table th.col-company {
+  width: 180px;
+  min-width: 150px;
+}
+
+.table-wrapper table td.col-address,
+.table-wrapper table th.col-address {
+  width: 250px;
+  min-width: 200px;
+}
+
+.table-wrapper table td.col-district,
+.table-wrapper table th.col-district {
+  width: 120px;
+  min-width: 100px;
+}
+
+.table-wrapper table td.col-person,
+.table-wrapper table th.col-person {
+  width: 160px;
+  min-width: 130px;
+}
+
+.table-wrapper table td.col-date_description,
+.table-wrapper table th.col-date_description {
+  width: 150px;
+  min-width: 120px;
+}
+
+/* Ensure text wraps properly in constrained columns */
+.table-wrapper table td {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  padding: 8px;
+  vertical-align: top;
+}
+
+/* Make long text columns more readable */
+.table-wrapper table td.col-GL_Text,
+.table-wrapper table td.col-address {
+  line-height: 1.4;
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+/* Alternative: Set relative widths instead of fixed */
+/*
+.table-wrapper table td.col-DPName_normalized { width: 15%; }
+.table-wrapper table td.col-Faction { width: 10%; }
+.table-wrapper table td.col-GL_Text { width: 25%; }
+.table-wrapper table td.col-address { width: 20%; }
+.table-wrapper table td.col-company { width: 15%; }
+*/
